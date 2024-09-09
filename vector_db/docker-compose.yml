@@ -1,0 +1,33 @@
+version: "3.0"
+services:
+  # ChromaDB Server
+  chroma:
+    image: ghcr.io/chroma-core/chroma:latest
+    volumes:
+      - index_data:/chroma/.chroma/index
+    ports:
+      - 8000:8000
+    networks:
+      - net
+
+  # Data Ingestion Service
+  ingestion:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    depends_on:
+      - chroma
+    volumes:
+      - ./:/app/
+    networks:
+      - net
+    command: ["python", "data_ingestion_pipeline.py"]  # Script to do data ingestion
+    restart: "no"  # Stop container after completion
+
+volumes:
+  index_data:
+    driver: local
+
+networks:
+  net:
+    driver: bridge
