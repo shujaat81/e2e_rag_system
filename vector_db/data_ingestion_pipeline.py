@@ -7,7 +7,7 @@ from llama_index.core.node_parser import (
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 from chromadb.config import Settings
 
-NUMBER_OF_CHUNKS = 500
+NUMBER_OF_CHUNKS = 50
 
 chroma_client = chromadb.HttpClient(
     host="chroma",
@@ -19,18 +19,19 @@ chroma_client = chromadb.HttpClient(
 documents = SimpleDirectoryReader(input_files=["./document.txt"]).load_data()
 
 # loads BAAI/bge-small-en-v1.5
-embed_model = HuggingFaceEmbedding(model_name="BAAI/bge-small-en-v1.5")
+embed_model = HuggingFaceEmbedding(
+    model_name="BAAI/bge-small-en-v1.5", cache_folder="models/"
+)
+print("loaded embedded model")
 
 splitter = SemanticSplitterNodeParser(
     buffer_size=1, breakpoint_percentile_threshold=70, embed_model=embed_model
 )
 
-# Also, the baseline splitter
-base_splitter = SentenceSplitter(chunk_size=512)
-
 nodes = splitter.get_nodes_from_documents(documents)
 
 document_collection = chroma_client.get_or_create_collection(name="document_semantic")
+print("collection created")
 count = 0
 # Process each node (chunk) and insert it into ChromaDB
 for node in nodes:

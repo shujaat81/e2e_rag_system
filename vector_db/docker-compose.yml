@@ -18,7 +18,8 @@ services:
     depends_on:
       - chroma
     volumes:
-      - ./:/app/
+      - ./:/app/  # Mount your app code
+      - ./models:/app/models  # Mount the local 'models/' directory to '/app/models' in the container
     networks:
       - net
     command: ["python", "data_ingestion_pipeline.py"]  # Script to do data ingestion
