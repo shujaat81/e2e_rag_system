@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: chroma-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: chroma-db
+  template:
+    metadata:
+      labels:
+        app: chroma-db
+    spec:
+      containers:
+        - name: chroma-db
+          image: ghcr.io/chroma-core/chroma:latest
+          ports:
+            - containerPort: 8000
+          volumeMounts:
+            - name: chroma-data
+              mountPath: /chroma/.chroma/index
+          readinessProbe:
+            tcpSocket:
+              port: 8000  # The port where ChromaDB is running
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          livenessProbe:
+            tcpSocket:
+              port: 8000  # Use TCP to check if the service is alive
+            initialDelaySeconds: 15
+            periodSeconds: 20
+      volumes:
+        - name: chroma-data
+          persistentVolumeClaim:
+            claimName: chroma-data-pvc

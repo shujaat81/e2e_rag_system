@@ -1,0 +1,18 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: data-ingestion-job
+spec:
+  template:
+    metadata:
+      labels:
+        app: data-ingestion
+    spec:
+      containers:
+        - name: data-ingestion
+          image: shujaat81/data_ingestion:latest
+          command: ["python", "data_ingestion_pipeline.py"]
+          env:
+            - name: CHROMA_HOST
+              value: chroma-db-service
+      restartPolicy: Never

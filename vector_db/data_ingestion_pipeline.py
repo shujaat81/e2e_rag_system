@@ -1,3 +1,4 @@
+import os
 import chromadb
 from llama_index.core import SimpleDirectoryReader
 from llama_index.core.node_parser import (
@@ -9,8 +10,10 @@ from chromadb.config import Settings
 
 NUMBER_OF_CHUNKS = 50
 
+chroma_host = os.environ.get("CHROMA_HOST", "chroma")
+
 chroma_client = chromadb.HttpClient(
-    host="chroma",
+    host=chroma_host,
     port=8000,
     settings=Settings(allow_reset=True, anonymized_telemetry=False),
 )
