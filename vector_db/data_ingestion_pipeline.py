@@ -1,4 +1,5 @@
 import os
+from tqdm import tqdm
 import chromadb
 from llama_index.core import SimpleDirectoryReader
 from llama_index.core.node_parser import (
@@ -36,22 +37,26 @@ nodes = splitter.get_nodes_from_documents(documents)
 document_collection = chroma_client.get_or_create_collection(name="document_semantic")
 print("collection created")
 count = 0
-# Process each node (chunk) and insert it into ChromaDB
-for node in nodes:
-    text_chunk = node.text  # Extract chunked text
-    embedding = embed_model.get_text_embedding(
-        text_chunk
-    )  # Generate embeddings for the chunk
 
-    # Insert into ChromaDB (assuming each chunk has a unique ID and corresponding embedding)
-    document_collection.add(
-        ids=[str(node.id_)],  # Use node ID or some other unique identifier
-        embeddings=[embedding],  # Insert the embedding
-        metadatas=[{"text": text_chunk}],  # Optionally store metadata like chunk text
-    )
-    print(f"Chunk with id {str(node.id_)} inserted into ChromaDB successfully!")
-    count += 1
-    if count == NUMBER_OF_CHUNKS:
-        break
+with tqdm(total=NUMBER_OF_CHUNKS, desc="Inserting chunks into ChromaDB") as pbar:
+    # Process each node (chunk) and insert it into ChromaDB
+    for node in nodes:
+        text_chunk = node.text  # Extract chunked text
+        embedding = embed_model.get_text_embedding(
+            text_chunk
+        )  # Generate embeddings for the chunk
 
-print("All Chunks inserted into ChromaDB successfully!")
+        # Insert into ChromaDB (assuming each chunk has a unique ID and corresponding embedding)
+        document_collection.add(
+            ids=[str(node.id_)],  # Use node ID or some other unique identifier
+            embeddings=[embedding],  # Insert the embedding
+            metadatas=[
+                {"text": text_chunk}
+            ],  # Optionally store metadata like chunk text
+        )
+        count += 1
+        pbar.update(1)
+        if count == NUMBER_OF_CHUNKS:
+            break
+
+    print("All Chunks inserted into ChromaDB successfully!")
