@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: flask-app
-          image: your-registry/your-flask-app-image:tag
+          image: shujaat81/llm_app:latest
           command: ["python", "deploy.py"]
           ports:
             - containerPort: 5000
