@@ -13,13 +13,10 @@ spec:
       labels:
         app: flask-app
     spec:
-      initContainers:
-        - name: wait-for-chroma
-          image: appropriate/curl
-          command: ['sh', '-c', 'until curl -s chroma-db-service:8000/health; do echo waiting for ChromaDB; sleep 5; done']
       containers:
         - name: flask-app
           image: your-registry/your-flask-app-image:tag
+          command: ["python", "deploy.py"]
           ports:
             - containerPort: 5000
           env:
